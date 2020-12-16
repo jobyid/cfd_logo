@@ -1,0 +1,15 @@
+So here is the idea:
+We are looking to create a machine learning or AI model which preditcs the close price of the FTSE 100 for a given day
+It is often suggested that the markets run on emotions, so I wonder how weather, day of the week, month and the moon
+could effect these emotions and therefore if the FTSE closes up or down on the day.
+
+Version 1:
+Takes the following
+    - Previous day, O,H,L,C
+    - Day of the week
+    - Month
+    - Moon Illumination
+    - Moon Distance
+    - Temperature
+    - Rain Fall
+    - Sunshine hrs
