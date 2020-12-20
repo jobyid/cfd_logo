@@ -40,7 +40,9 @@ def ftse_frame():
 def weather_frames():
     wd = pd.read_csv('weather.csv')
     w_df = pd.DataFrame(wd)
-    print(w_df.head())
+    w_df['date'] = w_df['dt_iso'].apply(lambda x: str(x))
+    ws_df = w_df[w_df['date'].str.contains('07:00:00 | 19:00:00')]
+    print(ws_df.head())
 
 def merge_frames(f1, f2, f3):
     final = pd.merge(f1,f2,f3, on='date')
