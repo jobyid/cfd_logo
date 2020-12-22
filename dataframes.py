@@ -66,15 +66,83 @@ def weather_frames():
     #print(wff_df.head())
     return wff_df
 
+def uncertenty_frame():
+    u_df = pd.read_csv('data/UK_Daily_Policy_Data.csv')
+    u_df['date'] = pd.to_datetime([f'{y}-{m}-{d}' for y, m, d in zip(u_df.year, u_df.month, u_df.day)])
+    u_df.rename(
+        columns={ 'daily_policy_index':'daily_policy_index_d-1'},
+        inplace=True)
+    u_df['daily_policy_index_d-1'] = u_df['daily_policy_index_d-1'].shift(1)
+    print(u_df.isnull().sum().sum())
+    u_df = u_df.dropna()
+    fu_df = u_df[['date', 'daily_policy_index_d-1']]
+    #print(fu_df.head())
+    return fu_df
+
+def gold_frame():
+    g_df = pd.read_csv('data/gold.csv')
+    g_df = g_df.dropna()
+    g_df.rename(
+        columns={'Date': 'date', 'Open': 'gold_open_d-1', 'High': 'gold_high_d-1', 'Low': 'gold_low_d-1', 'Close_': 'gold_close_d-1'},
+        inplace=True)
+    g_df['date'] = pd.to_datetime(g_df['date'], format="%b %d, %Y")
+    g_df['gold_open_d-1'] = g_df['gold_open_d-1'].shift(-1)
+    g_df['gold_high_d-1'] = g_df['gold_high_d-1'].shift(-1)
+    g_df['gold_low_d-1'] = g_df['gold_low_d-1'].shift(-1)
+    g_df['gold_close_d-1'] = g_df['gold_close_d-1'].shift(-1)
+    return g_df[['date','gold_open_d-1','gold_high_d-1','gold_low_d-1','gold_close_d-1']]
+
+def oil_frame():
+    o_df = pd.read_csv('data/crudeOil.csv')
+    o_df = o_df.dropna()
+    o_df.rename(
+        columns={'Date': 'date', 'Open': 'oil_open_d-1', 'High': 'oil_high_d-1', 'Low': 'oil_low_d-1', 'Close_': 'oil_close_d-1'},
+        inplace=True)
+    o_df['date'] = pd.to_datetime(o_df['date'], format="%b %d, %Y")
+    o_df['oil_open_d-1'] = o_df['oil_open_d-1'].shift(-1)
+    o_df['oil_high_d-1'] = o_df['oil_high_d-1'].shift(-1)
+    o_df['oil_low_d-1'] = o_df['oil_low_d-1'].shift(-1)
+    o_df['oil_close_d-1'] = o_df['oil_close_d-1'].shift(-1)
+    #print(o_df.head())
+    return o_df[['date','oil_open_d-1','oil_high_d-1','oil_low_d-1','oil_close_d-1']]
+
+def vix_frame():
+    v_df = pd.read_csv('data/vix.csv')
+    v_df = v_df.dropna()
+    v_df.rename(
+        columns={'Date': 'date', 'Open': 'vix_open_d-1', 'High': 'vix_high_d-1', 'Low': 'vix_low_d-1', 'Close_': 'vix_close_d-1'},
+        inplace=True)
+    v_df['date'] = pd.to_datetime(v_df['date'], format="%b %d, %Y")
+    v_df['vix_open_d-1'] = v_df['vix_open_d-1'].shift(-1)
+    v_df['vix_high_d-1'] = v_df['vix_high_d-1'].shift(-1)
+    v_df['vix_low_d-1'] = v_df['vix_low_d-1'].shift(-1)
+    v_df['vix_close_d-1'] = v_df['vix_close_d-1'].shift(-1)
+    #print(o_df.head())
+    return v_df[['date','vix_open_d-1','vix_high_d-1','vix_low_d-1','vix_close_d-1']]
+
+
 def merge_frames(f1, f2,f3):
     f = pd.merge(f1,f2, on='date')
-    final = pd.merge(f,f3)
+    final = pd.merge(f,f3, on='date')
     final = final.dropna()
+    auto_final = final.iloc[0:2000]
+    uncert_final = pd.merge(final, uncertenty_frame())
+    #print(uncert_final.head(10))
+    #print(uncert_final.describe())
+    #uncert_final.to_csv('final_with_uncert.csv')
+    all_df = pd.merge(final, gold_frame(), on='date')
+    all_df = pd.merge(all_df, oil_frame(), on='date')
+    all_df = pd.merge(all_df, vix_frame(), on='date')
+    print(all_df.columns)
+    all_df.to_csv('all_in.csv')
+    #auto_final.to_csv("final_to_test.csv")
     return final
 
+#print("Oil:\n",oil_frame().head(),"\n Gold: \n", gold_frame().head(), "\nVix:\n", vix_frame().head())
+#uncertenty_frame()
 #moon_frames()
 #weather_frames()
 #ftse_frame()
-
-merge_frames(moon_frames(),weather_frames(), ftse_frame()).to_csv('final_data.csv')
-print(merge_frames(moon_frames(),weather_frames(), ftse_frame()).isnull().sum().sum())
+merge_frames(moon_frames(),weather_frames(), ftse_frame())
+#merge_frames(moon_frames(),weather_frames(), ftse_frame()).to_csv('final_data.csv')
+#print(merge_frames(moon_frames(),weather_frames(), ftse_frame()).describe())
